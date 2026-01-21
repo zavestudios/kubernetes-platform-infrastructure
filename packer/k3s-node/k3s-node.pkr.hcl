@@ -31,14 +31,11 @@ source "qemu" "ubuntu" {
   # Output
   output_directory = var.output_directory
   
-  # No boot command needed - cloud image boots directly
-  # Cloud-init will be provided via CD-ROM drive
-  
-  # CD-ROM with cloud-init configuration
-  cd_files = [
-    "cloud-init/meta-data",
-    "cloud-init/user-data"
-  ]
+  # Create cloud-init seed ISO
+  cd_content = {
+    "meta-data" = file("cloud-init/meta-data")
+    "user-data" = file("cloud-init/user-data")
+  }
   cd_label = "cidata"
   
   # SSH Configuration
