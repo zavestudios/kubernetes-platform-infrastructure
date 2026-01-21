@@ -1,0 +1,27 @@
+# Terraform
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfvars
+**/.terraform/
+**/.terraform.lock.hcl
+**/crash.log
+
+# Packer
+packer_cache/
+**/output-*/
+**/*.iso
+packer-manifest.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log
