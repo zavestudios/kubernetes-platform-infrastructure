@@ -31,9 +31,10 @@ datasource:
     seedfrom: /var/lib/cloud/seed/nocloud-net/
 EOF
 
-# Enable qemu-guest-agent
-sudo systemctl enable qemu-guest-agent
-sudo systemctl start qemu-guest-agent
+# Enable qemu-guest-agent (non-fatal if it fails)
+echo "Enabling qemu-guest-agent..."
+sudo systemctl enable qemu-guest-agent || echo "Warning: Could not enable qemu-guest-agent"
+sudo systemctl start qemu-guest-agent || echo "Warning: Could not start qemu-guest-agent"
 
 # Kernel modules for k3s
 echo "Loading required kernel modules..."
