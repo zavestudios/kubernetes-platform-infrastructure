@@ -1,3 +1,9 @@
+variable "user" {
+  description = "User and group for file ownership"
+  type        = string
+  default     = ""
+}
+
 variable "ubuntu_version" {
   type        = string
   description = "Ubuntu version to use"
@@ -55,5 +61,5 @@ variable "vm_name" {
 variable "libvirt_pool_path" {
   type        = string
   description = "Path to libvirt storage pool"
-  default     = env("HOME")
+  default     = ""
 }
