@@ -22,15 +22,6 @@ sudo apt-get install -y \
     cloud-init \
     cloud-initramfs-growroot
 
-# Configure cloud-init for libvirt
-echo "Configuring cloud-init..."
-sudo tee /etc/cloud/cloud.cfg.d/99-libvirt.cfg > /dev/null <<EOF
-datasource_list: [ NoCloud, ConfigDrive ]
-datasource:
-  NoCloud:
-    seedfrom: /var/lib/cloud/seed/nocloud-net/
-EOF
-
 # Enable qemu-guest-agent (non-fatal if it fails)
 echo "Enabling qemu-guest-agent..."
 sudo systemctl enable qemu-guest-agent || echo "Warning: Could not enable qemu-guest-agent"
@@ -69,14 +60,19 @@ sudo apt-get install -y \
     conntrack \
     ipset
 
-# Clean up
-echo "Cleaning up..."
-sudo apt-get autoremove -y
-sudo apt-get autoclean -y
-
 # Clean cloud-init so it runs fresh on cloned VMs
 echo "Cleaning cloud-init state..."
 sudo cloud-init clean --logs --seed
-sudo rm -rf /var/lib/cloud/instances /var/lib/cloud/instance
+sudo rm -rf /var/lib/cloud/instances/*
+sudo rm -rf /var/lib/cloud/instance
+sudo rm -rf /var/lib/cloud/data
+sudo rm -rf /var/lib/cloud/seed/*
+sudo rm -rf /var/log/cloud-init*
+
+# Remove cloud-init config that forces NoCloud datasource
+sudo rm -f /etc/cloud/cloud.cfg.d/99-libvirt.cfg
+
+# Force sync to disk
+sudo sync
 
 echo "=== k3s node setup complete ==="
