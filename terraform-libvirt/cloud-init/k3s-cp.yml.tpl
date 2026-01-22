@@ -1,4 +1,9 @@
 #cloud-config
+datasource_list: [ NoCloud, None ]
+datasource:
+  NoCloud:
+    fs_label: cidata
+
 hostname: ${hostname}
 fqdn: ${hostname}.local
 
