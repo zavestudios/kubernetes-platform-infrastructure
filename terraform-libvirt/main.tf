@@ -1,7 +1,7 @@
 locals {
   ssh_public_key = file(pathexpand(var.ssh_public_key_path))
   k3s_token      = var.k3s_token != "" ? var.k3s_token : random_password.k3s_token.result
-  k3s_version    = var.k3s_version != "" ? var.k3s_version : "stable"
+  k3s_version    = var.k3s_version
 }
 
 # Generate random token for k3s cluster if not provided

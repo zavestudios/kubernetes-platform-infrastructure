@@ -73,7 +73,7 @@ variable "disk_size" {
 variable "k3s_version" {
   description = "k3s version to install (e.g., v1.31.1+k3s1). Leave empty for latest stable."
   type        = string
-  default     = ""
+  default     = "v1.34.3+k3s1"
 }
 
 variable "k3s_token" {
