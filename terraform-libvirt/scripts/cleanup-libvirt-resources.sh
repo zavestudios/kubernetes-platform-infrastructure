@@ -20,9 +20,9 @@ done
 echo "Deleting volumes from libvirt pool..."
 for vol in k3s-cp-01.qcow2 k3s-worker-01.qcow2 k3s-worker-02.qcow2 \
            k3s-cp-01-cloudinit.iso k3s-worker-01-cloudinit.iso k3s-worker-02-cloudinit.iso; do
-    if sudo virsh vol-list --pool xlopez | grep -q "$vol"; then
+    if sudo virsh vol-list --pool libvirt_images | grep -q "$vol"; then
         echo "  Deleting $vol from pool..."
-        sudo virsh vol-delete --pool xlopez "$vol" 2>/dev/null || true
+        sudo virsh vol-delete --pool libvirt_images "$vol" 2>/dev/null || true
     fi
 done
 
