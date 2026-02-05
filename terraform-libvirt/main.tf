@@ -10,11 +10,11 @@ resource "random_password" "k3s_token" {
   special = false
 }
 
-# Base volume (used as backing image for all VMs)
-resource "libvirt_volume" "base" {
-  name   = var.base_volume_name
-  pool   = var.libvirt_pool
-  format = "qcow2"
+# Base volume (must be pre-built with Packer)
+# This data source references an existing volume instead of creating a new one
+data "libvirt_volume" "base" {
+  name = var.base_volume_name
+  pool = var.libvirt_pool
 }
 
 # Control Plane Nodes
@@ -22,7 +22,7 @@ resource "libvirt_volume" "control_plane" {
   count          = var.control_plane_count
   name           = "k3s-cp-${format("%02d", count.index + 1)}.qcow2"
   pool           = var.libvirt_pool
-  base_volume_id = libvirt_volume.base.id
+  base_volume_id = data.libvirt_volume.base.id
   size           = var.disk_size
   format         = "qcow2"
 }
@@ -45,7 +45,10 @@ resource "libvirt_cloudinit_disk" "control_plane" {
   network_config = <<-EOT
     version: 2
     ethernets:
-      ens3:
+      eth0:
+        match:
+          name: "en*"
+        set-name: eth0
         addresses:
           - 192.168.122.10/24
         routes:
@@ -93,7 +96,7 @@ resource "libvirt_volume" "worker" {
   count          = var.worker_count
   name           = "k3s-worker-${format("%02d", count.index + 1)}.qcow2"
   pool           = var.libvirt_pool
-  base_volume_id = libvirt_volume.base.id
+  base_volume_id = data.libvirt_volume.base.id
   size           = var.disk_size
   format         = "qcow2"
 }
@@ -116,7 +119,10 @@ resource "libvirt_cloudinit_disk" "worker" {
   network_config = <<-EOT
     version: 2
     ethernets:
-      ens3:
+      eth0:
+        match:
+          name: "en*"
+        set-name: eth0
         addresses:
           - 192.168.122.${11 + count.index}/24
         routes:
