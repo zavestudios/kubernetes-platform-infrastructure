@@ -105,6 +105,7 @@ runcmd:
       sh -s - server \
       --write-kubeconfig-mode 644 \
       --disable=traefik \
+      --tls-san=127.0.0.1 \
       --node-name=${hostname}
     
     # Wait for k3s to be ready

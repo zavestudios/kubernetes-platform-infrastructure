@@ -172,3 +172,72 @@ resource "libvirt_domain" "worker" {
 
   depends_on = [libvirt_domain.control_plane]
 }
+
+# Bastion Host
+resource "libvirt_volume" "bastion" {
+  name           = "k3s-bastion-01.qcow2"
+  pool           = var.libvirt_pool
+  base_volume_id = libvirt_volume.base.id
+  # Size inherited from base volume (80GB) - must be >= base volume size
+  format         = "qcow2"
+}
+
+resource "libvirt_cloudinit_disk" "bastion" {
+  name      = "k3s-bastion-01-cloudinit.iso"
+  pool      = var.libvirt_pool
+  user_data = templatefile("${path.module}/cloud-init/bastion.yml.tpl", {
+    hostname         = "k3s-bastion-01"
+    ssh_public_key   = local.ssh_public_key
+    k3s_version      = local.k3s_version
+    control_plane_ip = "192.168.122.10"
+  })
+  meta_data = <<-EOT
+    instance-id: k3s-bastion-01-${uuid()}
+    local-hostname: k3s-bastion-01
+  EOT
+  network_config = <<-EOT
+    version: 2
+    ethernets:
+      ens3:
+        addresses:
+          - 192.168.122.13/24
+        routes:
+          - to: default
+            via: 192.168.122.1
+        nameservers:
+          addresses: [8.8.8.8, 1.1.1.1]
+  EOT
+}
+
+resource "libvirt_domain" "bastion" {
+  name   = "k3s-bastion-01"
+  memory = var.bastion_memory
+  vcpu   = var.bastion_vcpu
+
+  cloudinit = libvirt_cloudinit_disk.bastion.id
+
+  disk {
+    volume_id = libvirt_volume.bastion.id
+  }
+
+  network_interface {
+    network_name   = var.libvirt_network
+    wait_for_lease = false
+  }
+
+  console {
+    type        = "pty"
+    target_port = "0"
+    target_type = "serial"
+  }
+
+  graphics {
+    type        = "spice"
+    listen_type = "address"
+    autoport    = true
+  }
+
+  qemu_agent = false
+
+  depends_on = [libvirt_domain.control_plane]
+}

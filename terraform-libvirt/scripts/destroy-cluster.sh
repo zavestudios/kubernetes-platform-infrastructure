@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 echo "=== Destroying k3s cluster (preserving base volume) ==="
 echo ""
 echo "This will destroy:"
-echo "  - Control plane and worker VMs"
+echo "  - Control plane, worker, and bastion VMs"
 echo "  - VM volumes (qcow2 files)"
 echo "  - Cloud-init ISOs"
 echo ""
@@ -30,10 +30,13 @@ echo "Destroying cluster resources..."
 docker compose run --rm terraform destroy \
   -target=libvirt_domain.control_plane \
   -target=libvirt_domain.worker \
+  -target=libvirt_domain.bastion \
   -target=libvirt_volume.control_plane \
   -target=libvirt_volume.worker \
+  -target=libvirt_volume.bastion \
   -target=libvirt_cloudinit_disk.control_plane \
-  -target=libvirt_cloudinit_disk.worker
+  -target=libvirt_cloudinit_disk.worker \
+  -target=libvirt_cloudinit_disk.bastion
 
 echo ""
 echo "=== Cluster destroyed successfully ==="

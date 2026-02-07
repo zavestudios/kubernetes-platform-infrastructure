@@ -44,8 +44,14 @@ output "cluster_info" {
   value = {
     control_plane_count = var.control_plane_count
     worker_count        = var.worker_count
+    bastion_ip          = "192.168.122.13"
     k3s_version         = local.k3s_version
-    total_vcpu          = (var.control_plane_count * var.control_plane_vcpu) + (var.worker_count * var.worker_vcpu)
-    total_memory_gb     = ((var.control_plane_count * var.control_plane_memory) + (var.worker_count * var.worker_memory)) / 1024
+    total_vcpu          = (var.control_plane_count * var.control_plane_vcpu) + (var.worker_count * var.worker_vcpu) + var.bastion_vcpu
+    total_memory_gb     = ((var.control_plane_count * var.control_plane_memory) + (var.worker_count * var.worker_memory) + var.bastion_memory) / 1024
   }
+}
+
+output "bastion_access" {
+  description = "Bastion SSH access command"
+  value       = "ssh ubuntu@192.168.122.13 (or via hypervisor: ssh kpi-bastion-01)"
 }

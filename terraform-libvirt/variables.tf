@@ -82,3 +82,15 @@ variable "k3s_token" {
   default     = ""
   sensitive   = true
 }
+
+variable "bastion_vcpu" {
+  description = "Number of vCPUs for bastion host"
+  type        = number
+  default     = 2
+}
+
+variable "bastion_memory" {
+  description = "Memory in MB for bastion host"
+  type        = number
+  default     = 4096
+}

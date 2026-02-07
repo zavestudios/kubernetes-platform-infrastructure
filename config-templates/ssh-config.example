@@ -1,0 +1,56 @@
+# SSH Config for k3s cluster access
+# Add this to your ~/.ssh/config file
+#
+# Update the following values:
+#   - <HYPERVISOR_IP>: Your hypervisor's IP address (e.g., 192.168.1.11)
+#   - <YOUR_SSH_KEY>: Path to your SSH private key (e.g., ~/.ssh/id_rsa)
+
+# Hypervisor host
+Host hypervisor kpi-hypervisor
+  HostName <HYPERVISOR_IP>
+  User xlopez
+  IdentityFile <YOUR_SSH_KEY>
+  ForwardAgent yes
+
+# Bastion host (jump box for cluster access)
+Host kpi-bastion-01 bastion
+  HostName 192.168.122.13
+  User ubuntu
+  IdentityFile <YOUR_SSH_KEY>
+  ProxyJump hypervisor
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+
+# Control plane
+Host kpi-cp-01 k3s-cp-01
+  HostName 192.168.122.10
+  User ubuntu
+  IdentityFile <YOUR_SSH_KEY>
+  ProxyJump hypervisor
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+
+# Worker nodes
+Host kpi-worker-01 k3s-worker-01
+  HostName 192.168.122.11
+  User ubuntu
+  IdentityFile <YOUR_SSH_KEY>
+  ProxyJump hypervisor
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+
+Host kpi-worker-02 k3s-worker-02
+  HostName 192.168.122.12
+  User ubuntu
+  IdentityFile <YOUR_SSH_KEY>
+  ProxyJump hypervisor
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+
+# Usage examples:
+#   ssh kpi-bastion-01                    # Access bastion (run kubectl here)
+#   ssh kpi-cp-01                          # Access control plane directly
+#   ssh kpi-worker-01                      # Access worker node directly
+#
+# The bastion host is the recommended jump box for cluster management.
+# It has kubectl, k9s, flux, and helm pre-installed.

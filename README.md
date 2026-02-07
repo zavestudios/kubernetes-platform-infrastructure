@@ -51,8 +51,12 @@ ssh ubuntu@192.168.122.10 'cloud-init status --wait'
 ssh ubuntu@192.168.122.10 'sudo k3s kubectl get nodes'
 # All 3 nodes should show Ready status
 
-# 10. Setup kubectl access from laptop (~1 second)
-./scripts/setup-kubectl-tunnel.sh
+# 10. Setup SSH config (one-time)
+# Copy config-templates/ssh-config.example to ~/.ssh/config
+# Update <HYPERVISOR_IP> and <YOUR_SSH_KEY> placeholders
+
+# 11. Setup kubectl access from laptop via bastion (~1 second)
+./scripts/setup-kubectl-bastion.sh
 export KUBECONFIG=~/.kube/kpi.yaml
 kubectl get nodes -o wide
 ```
@@ -65,32 +69,78 @@ k3s-worker-01   Ready    <none>          7m    v1.34.3+k3s1
 k3s-worker-02   Ready    <none>          7m    v1.34.3+k3s1
 ```
 
+**Alternative: Use kubectl directly on bastion:**
+```bash
+ssh kpi-bastion-01
+kubectl get nodes  # kubeconfig pre-configured
+k9s               # interactive cluster management
+```
+
 ## What This Provides
 
 - **3-node k3s cluster**: 1 control plane + 2 workers
+- **Bastion host**: Dedicated jump box with kubectl, k9s, flux, helm pre-installed
 - **Automated deployment**: Terraform + Packer + cloud-init
-- **Static networking**: Predictable IPs (192.168.122.10-12)
-- **Production patterns**: Multi-node, persistent storage, proper networking
+- **Static networking**: Predictable IPs (192.168.122.10-13)
+- **Production patterns**: Bastion architecture, network isolation, proper TLS
 - **Reproducible**: Destroy and recreate identical cluster in ~5 minutes
 
 ## Architecture
 
+**Bastion Pattern:**
+- Hypervisor: Virtualization host (192.168.1.x)
+- Bastion: Jump box with cluster tools (192.168.122.13)
+- Cluster: Isolated network (192.168.122.10-12)
+- Access: Laptop → SSH → Bastion → Cluster
+
 **Node Specifications:**
-- 6 vCPUs, 10GB RAM, 80GB disk per node
+- Control Plane/Workers: 6 vCPUs, 10GB RAM, 80GB disk
+- Bastion: 2 vCPUs, 4GB RAM, 80GB disk (inherited from base volume)
 - Ubuntu 24.04 LTS
-- k3s v1.34.3+k3s1 (pinned)
+- k3s v1.34.3+k3s1 (pinned, with TLS SAN for 127.0.0.1)
 
 **Network:**
-- libvirt default network (192.168.122.0/24)
+- Hypervisor network: 192.168.1.0/24 (physical LAN)
+- Cluster network: 192.168.122.0/24 (libvirt NAT)
+- Network isolation: VMs not directly accessible from LAN
 - Static IPs via cloud-init
 - flannel CNI for pod networking
 
 **Deployment:**
 - Packer builds Ubuntu base image
 - Terraform provisions VMs via libvirt provider
-- cloud-init installs and configures k3s
+- cloud-init installs k3s (cluster) or tools (bastion)
+
+**Tools on Bastion:**
+- kubectl (cluster management)
+- k9s (cluster TUI)
+- flux CLI (GitOps)
+- helm (package manager)
 
 For detailed architecture, see [docs/kpi-architecture.md](docs/kpi-architecture.md)
+
+### Why Bastion Architecture?
+
+**Security & Isolation:**
+- Cluster nodes isolated on private network (192.168.122.0/24)
+- Single controlled entry point for cluster access
+- Reduces attack surface (no direct external access to cluster)
+
+**Production Pattern:**
+- Mirrors enterprise bastion/jump box architecture
+- Translates directly to AWS (bastion in public subnet, cluster in private)
+- Demonstrates defense-in-depth security principles
+
+**Operational Benefits:**
+- All cluster tools pre-installed and configured on bastion
+- Consistent environment for cluster management
+- TLS verification works correctly (k3s cert includes 127.0.0.1 SAN)
+- No local tool installation required (kubectl, k9s, flux, helm on bastion)
+
+**For Internet Access:**
+- Workloads accessible via Cloudflare Tunnel (outbound connections)
+- No router port forwarding or firewall rules needed
+- NAT network doesn't limit ingress capabilities
 
 ## Prerequisites
 
@@ -104,11 +154,12 @@ For detailed architecture, see [docs/kpi-architecture.md](docs/kpi-architecture.
 - Docker or Podman (for containerized Terraform)
 - SSH access to hypervisor host
 - SSH key pair (`~/.ssh/id_rsa`)
+- SSH config configured (see `config-templates/ssh-config.example`)
 
 **Hardware:**
-- 32GB+ RAM (30GB for VMs + 2GB host)
-- 250GB+ free disk space
-- 18+ CPU cores recommended
+- 36GB+ RAM (34GB for VMs + 2GB host)
+- 320GB+ free disk space (4x 80GB VMs)
+- 20+ CPU cores recommended
 
 ## Common Operations
 
@@ -147,15 +198,20 @@ docker compose run --rm terraform apply
 
 **Access cluster:**
 ```bash
-# Via kubectl from laptop (through SSH tunnel)
+# RECOMMENDED: Via bastion host (production pattern)
+ssh kpi-bastion-01
+kubectl get nodes  # kubeconfig pre-configured
+k9s                # interactive cluster TUI
+
+# Alternative: kubectl from laptop (through bastion tunnel)
 export KUBECONFIG=~/.kube/kpi.yaml
 kubectl get nodes
 
-# Via SSH to control plane (through hypervisor ProxyJump)
+# Direct SSH to control plane (for debugging)
 ssh kpi-cp-01
 sudo k3s kubectl get nodes
 
-# Directly on hypervisor (for debugging)
+# From hypervisor (emergency access)
 ssh hypervisor
 ssh ubuntu@192.168.122.10
 sudo k3s kubectl get nodes
