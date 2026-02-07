@@ -36,26 +36,20 @@ docker compose run --rm terraform apply
 
 # Wait ~7 minutes for cloud-init to install k3s and bootstrap cluster
 
-# 7. Verify VMs are running
-ssh ubuntu@192.168.122.10 echo "VM reachable"
-# On first connection, you'll see:
-# Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-# Warning: Permanently added '192.168.122.10' (ED25519) to the list of known hosts.
-# Password: ubuntu
+# 7. Setup SSH config (one-time, before first SSH)
+# Copy config-templates/ssh-config.example to ~/.ssh/config
+# Update <HYPERVISOR_IP> and <USER> placeholders
+# Uses wildcard pattern for clean access to all kpi-* hosts
 
 # 8. Check cloud-init completion
-ssh ubuntu@192.168.122.10 'cloud-init status --wait'
+ssh kpi-cp-01 'cloud-init status --wait'
 # Output when done: status: done
 
 # 9. Verify cluster is operational
-ssh ubuntu@192.168.122.10 'sudo k3s kubectl get nodes'
+ssh kpi-cp-01 'sudo k3s kubectl get nodes'
 # All 3 nodes should show Ready status
 
-# 10. Setup SSH config (one-time)
-# Copy config-templates/ssh-config.example to ~/.ssh/config
-# Update <HYPERVISOR_IP> and <YOUR_SSH_KEY> placeholders
-
-# 11. Setup kubectl access from laptop via bastion (~1 second)
+# 10. Setup kubectl access from laptop via bastion (~1 second)
 ./scripts/setup-kubectl-bastion.sh
 export KUBECONFIG=~/.kube/kpi.yaml
 kubectl get nodes -o wide
@@ -188,9 +182,10 @@ kubectl get nodes
 cd ~/kubernetes-platform-infrastructure/packer/k3s-node
 packer build .
 
-# From laptop: reimport and redeploy
+# From laptop: destroy, remove old base from state, reimport, redeploy
 cd terraform-libvirt
 ./scripts/destroy-cluster.sh
+docker compose run --rm terraform state rm libvirt_volume.base
 docker compose run --rm terraform import libvirt_volume.base \
   /home/YOUR_USER/libvirt_images/k3s-node-ubuntu-24.04.qcow2
 docker compose run --rm terraform apply
