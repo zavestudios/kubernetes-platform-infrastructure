@@ -81,8 +81,9 @@ build {
   post-processor "shell-local" {
     inline = [
       "echo 'Copying image to libvirt pool...'",
-      "sudo cp ${var.output_directory}/${var.vm_name} ${var.libvirt_pool_path}/${var.vm_name}.qcow2",
-      "sudo chown ${var.user}:${var.user} ${var.libvirt_pool_path}/${var.vm_name}.qcow2",
+      "mkdir -p ${var.libvirt_pool_path}",
+      "cp ${var.output_directory}/${var.vm_name} ${var.libvirt_pool_path}/${var.vm_name}.qcow2",
+      "chown $USER:$USER ${var.libvirt_pool_path}/${var.vm_name}.qcow2",
       "echo 'Image available at: ${var.libvirt_pool_path}/${var.vm_name}.qcow2'"
     ]
   }
