@@ -13,7 +13,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  Link Check:
+  link-check:
+    name: Link Check
     uses: zavestudios/platform-pipelines/.github/workflows/link-check.yml@main
     with:
       fail_on_error: false  # Don't block PRs, just warn
