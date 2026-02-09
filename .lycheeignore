@@ -1,0 +1,12 @@
+# Lychee link checker ignore patterns
+# Local infrastructure URLs that GitHub Actions cannot reach
+
+# Local network IPs (RFC 1918 private addresses)
+https://192.168.*
+http://192.168.*
+
+# Localhost references
+https://127.0.0.1*
+http://127.0.0.1*
+https://localhost*
+http://localhost*
