@@ -4,9 +4,13 @@
 
 Part of the [ZaveStudios multi-tenant platform](https://github.com/zavestudios/zavestudios) - provides the infrastructure layer for hosting multiple tenant applications with isolated resources.
 
+**Repository Category:** `infrastructure` (canonical classification in [REPO_TAXONOMY.md](https://github.com/zavestudios/platform-docs/blob/main/_platform/REPO_TAXONOMY.md))
+
 ## Quick Start
 
 **First-time setup from laptop** (zero to running cluster in ~11 minutes):
+
+**Run manually by human:**
 
 ```bash
 # 1. Clone repository
@@ -160,6 +164,7 @@ For detailed architecture, see [docs/kpi-architecture.md](docs/kpi-architecture.
 ## Common Operations
 
 **Rebuild cluster (preserves base image):**
+**Run manually by human:**
 ```bash
 cd terraform-libvirt
 
@@ -179,6 +184,7 @@ kubectl get nodes
 ```
 
 **Update base image:**
+**Run manually by human:**
 ```bash
 # On hypervisor host (~3.5 minutes)
 cd ~/kubernetes-platform-infrastructure/packer/k3s-node
@@ -194,6 +200,7 @@ docker compose run --rm terraform apply
 ```
 
 **Access cluster:**
+**Run manually by human:**
 ```bash
 # RECOMMENDED: Via bastion host (production pattern)
 ssh k3s-bastion-01
@@ -238,11 +245,13 @@ sudo k3s kubectl get nodes
 After cluster is operational:
 
 1. **Verify bastion kubectl access** - Kubeconfig auto-configured during cloud-init
+   **Run manually by human:**
    ```bash
    ssh k3s-bastion-01 'kubectl get nodes'
    ```
 
 2. **Bootstrap Flux GitOps** - Platform services management
+   **Run manually by human:**
    ```bash
    # SSH to bastion
    ssh k3s-bastion-01
@@ -277,7 +286,7 @@ This infrastructure hosts multiple tenant applications:
 
 Each application has:
 - Isolated Kubernetes namespace
-- Dedicated database tenant in [pg-multitenant](https://github.com/zavestudios/pg-multitenant)
+- Dedicated database tenant in [pg](https://github.com/zavestudios/pg)
 - Deployment via ArgoCD GitOps
 
 ---
