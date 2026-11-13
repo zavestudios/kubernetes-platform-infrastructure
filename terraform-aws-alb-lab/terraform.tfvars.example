@@ -1,0 +1,8 @@
+aws_region = "us-west-2"
+name_prefix = "zavestudios-alb-lab"
+ttl_hours = 24
+
+tags = {
+  environment = "lab"
+  owner       = "zavestudios"
+}
