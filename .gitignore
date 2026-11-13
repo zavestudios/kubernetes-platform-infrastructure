@@ -5,6 +5,9 @@
 **/tfplan
 **/.terraform/
 **/.terraform.lock.hcl
+!terraform-aws-alb-lab/.terraform.lock.hcl
+!terraform-aws-alb-lab/bootstrap/.terraform.lock.hcl
+terraform-aws-alb-lab/lambda/function.zip
 **/crash.log
 
 # Packer

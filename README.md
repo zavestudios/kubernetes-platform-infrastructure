@@ -109,6 +109,18 @@ terraform output
 
 The resulting outputs will be consumed later in `gitops` when wiring Vault to AWS KMS.
 
+## AWS ALB Behavior Lab
+
+The disposable [AWS ALB behavior lab](terraform-aws-alb-lab) exercises ALB
+listeners, rules, EC2 and Lambda target groups, health checks, access logs, and
+failure evidence without introducing EKS.
+
+It includes a separate one-time bootstrap for versioned remote state and
+GitHub Actions OIDC roles. Pull requests validate and plan with read-only AWS
+access; apply and destroy are manual operations protected by the
+`aws-alb-lab` GitHub environment. The implementation does not provision AWS
+resources automatically.
+
 ## Keycloak Identity Bootstrap
 
 This repository also contains a Terraform surface for Keycloak-managed identity
