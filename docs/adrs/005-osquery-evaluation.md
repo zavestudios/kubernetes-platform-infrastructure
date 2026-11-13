@@ -209,7 +209,7 @@ The evaluation considers:
 ## References
 
 - [osquery Official Documentation](https://osquery.io/)
-- [Ansible osquery role](../../ansible/roles/osquery/)
+- [Ansible osquery role](https://github.com/zavestudios/ansible/tree/main/roles/osquery)
 - [Falco - Kubernetes Runtime Security](https://falco.org/)
 - [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator)
 

@@ -13,6 +13,6 @@ on:
 jobs:
   link-check:
     name: Link Check
-    uses: zavestudios/platform-pipelines/.github/workflows/link-check.yml@c7ff44185036d3d8eaf2bca1f80a960a3bf088d7 # main
+    uses: zavestudios/platform-pipelines/.github/workflows/link-check.yml@23f7b203cfb67d9b4dd7861e655570854a9bb45e # main
     with:
       fail_on_error: false  # Don't block PRs, just warn
